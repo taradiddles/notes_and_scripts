@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-05-07T09:13:27Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template DPS310 weather statistics SNMPv2</template>
+            <name>Template DPS310 weather statistics SNMPv2</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Weather</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>DPS310 weather statistics</name>
+                    <type>SNMPV2</type>
+                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <snmp_oid>NET-SNMP-EXTEND-MIB::nsExtendOutputFull.&quot;weather&quot;</snmp_oid>
+                    <key>dps310.weather-stats</key>
+                    <delay>4m</delay>
+                    <history>1d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Weather</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Pressure</name>
+                    <type>DEPENDENT</type>
+                    <key>dps310.weather-stats.pressure</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>730d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>hPa</units>
+                    <applications>
+                        <application>
+                            <name>Weather</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(^| )pressure:(-?[0-9\.]+)( |$)
+\2</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>dps310.weather-stats</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Temperature</name>
+                    <type>DEPENDENT</type>
+                    <key>dps310.weather-stats.temperature</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>730d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>C</units>
+                    <applications>
+                        <application>
+                            <name>Weather</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(^| )temp:(-?[0-9\.]+)( |$)
+\2</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>dps310.weather-stats</key>
+                    </master_item>
+                </item>
+            </items>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>DPS310 Atmospheric pressure</name>
+            <graph_items>
+                <graph_item>
+                    <drawtype>GRADIENT_LINE</drawtype>
+                    <color>90CAF9</color>
+                    <calc_fnc>ALL</calc_fnc>
+                    <item>
+                        <host>Template DPS310 weather statistics SNMPv2</host>
+                        <key>dps310.weather-stats.pressure</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>DPS310 Temperature</name>
+            <graph_items>
+                <graph_item>
+                    <color>F63100</color>
+                    <calc_fnc>ALL</calc_fnc>
+                    <item>
+                        <host>Template DPS310 weather statistics SNMPv2</host>
+                        <key>dps310.weather-stats.temperature</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+</zabbix_export>

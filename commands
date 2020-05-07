@@ -1,0 +1,347 @@
+
+## convert epoch to date
+date -d @1307953931  "+%Y-%m-%d"
+
+## VNC
+echo yoyo123 | vncviewer -passwdInput true AutoSelect=false ZlibLevel=9 LowColourLevel=1 localhost:5901
+
+## profiling screen
+http://blog.pcode.nl/2009/01/19/color-profiling-your-screen/
+dispcal -v -y l ibm
+targen -v -d 3 -f 99 ibm
+dispread -v -y l ibm
+colprof -v -A "IBM" -M "LP141WP2-TLB1"  -D "IBM LP141WP2-TLB1 (`date ‘+%-e %b %Y’`)" -C "Public Domain" -q h -a S -n c ibm
+
+## exiv2 
+exiv2 -Y 2 -O 2 -D 18 -a 0:40 ad yo.JPG # add 2 years 2 months 18 days 0 hours 40 minutes
+exiv2 -T yo.JPG # set file timestamp to exiv2
+exiv2 ex DSCN0397.JPG ; cp DSCN0397.exv DSCN0397_g.exv ; exiv2 in DSCN0397_g.JPG # copy exiv tags 
+
+## encrypt stuff
+### optional / fill random data
+dd if=/dev/urandom of=/dev/sdb1
+### CREATE
+cryptsetup luksFormat /dev/sda7
+cryptsetup luksOpen /dev/sda7 luks_crypt
+mkfs.ext3 -m0 /dev/mapper/luks_crypt
+mount /dev/mapper/luks_crypt /crypt
+### ADD
+cryptsetup luksOpen /dev/sda7 luks_crypt
+mount /dev/mapper/luks_crypt /crypt
+### REMOVE
+cryptsetup remove luks_crypt
+
+## use dbus-send to suspend system
+dbus-send \
+--session \
+--dest=org.freedesktop.PowerManagement \
+--type=method_call \
+--print-reply \
+--reply-timeout=2000 \
+/org/freedesktop/PowerManagement \
+org.freedesktop.PowerManagement.Suspend
+
+## xrandr
+xrandr --output VGA1 --auto --right-of LVDS1
+xrandr --output VGA1 --off
+
+# virtualbox
+VBoxManage modifyvm "Openwrt" --hostonlyadapter4 vboxnet3
+
+# semanage
+semanage fcontext -a -t public_content_rw_t "/home/graphs(/.*)?"
+
+# show ext[234] header
+dumpe2fs -h /dev/hda6
+
+# duplicate sound output
+pacmd
+load-module module-combine sink_name=both slaves=alsa_output.usb-M-Audio_Transit_USB-00-USB.analog-stereo,alsa_output.pci-0000_00_1b.0.analog-stereo
+
+# extract only mail headers
+sed -r '/^\r?$/q'
+
+# get subject from mail, and don't read body to save time
+sed -nr '/^Subject: /,$p; /^\r?$/q'
+
+# capture for wireshark
+tcpdump -i <interface> -s 65535 -w <some-file>
+
+# rip dvd
+mkisofs -o ~/dsa.iso -J -A -V -v -R /dev/sr0
+vobcopy -m 
+
+# rpm query arch size
+rpm -qa --qf="%{size} %{name} %{arch}\n" | sort -n
+
+# rpm query by vendor (repo)
+rpm -qa --qf '%{NAME} %{VENDOR}\n'
+
+# LVM mount
+pvscan
+vgchange -ay VolGroup01
+mount /dev/VolGroup01/LogVol00 /mnt
+umount /mnt
+vgchange -an VolGroup01
+
+# LVM resize
+fdisk : delete partition, recreate, with same starting sector nb.
+pvresize /dev/sdc2
+lvresize -L+2000M /dev/VolGroup01/LogVol00
+vgchange -ay VolGroup01
+resize2fs /dev/VolGroup01/LogVol00
+vgchange -an VolGroup01
+
+# get a disk's uuid
+ls -l /dev/disk/by-uuid
+## or
+blkid
+
+# openssh check expiration date
+openssl s_client -connect hostname:port > cert
+openssl x509 -in cert -noout -enddate
+
+# openssl extract pk12 to pem/key
+openssl pkcs12 -in path.p12 -out newfile.crt.pem -clcerts -nokeys
+openssl pkcs12 -in path.p12 -out newfile.key.pem -nocerts -nodes
+
+# convert video in h264
+ffmpeg -strict 2 -i MVI_0253.MOV -vcodec libx264 movie.mkv
+ffmpeg -strict 2 -i MVI_0253.MOV -vcodec libx264 -s 720x408 movie.mkv
+ffmpeg -i 00048.MTS -deinterlace -vcodec libx264 -sn movie.mkv
+ffmpeg -i 00048.MTS -deinterlace -vcodec libx264 -s 720x480 -sn movie.mkv
+ffmpeg -i 00048.MTS -deinterlace -target pal-dvd -acodec libmp3lame movie.mkv # big size, bad quality
+
+# convert video in h265
+ffmpeg -i input.mp4 -s 640x480 -codec:v libx265 -preset ultrafast -crf 25 -codec:a aac output.mp4
+
+# get video resolution
+ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 input.mp4
+
+# get video duration in seconds
+ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=s=x:p=0 input.mp4
+# get video duration in HH:MM:SS
+ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=s=x:p=0 input.mp4 | awk '{print strftime("%H:%M:%S", $1,1)}'
+
+# show avalaible fields for audio stream #0
+ffprobe -v error -select_streams a:0 -show_entries stream input.mp4
+
+# extract audio (eg. aac) stream into m4a container
+ffmpeg -i input.mp4 -vn -codec:a copy test.m4a
+
+# gimp batch mode
+gimp -i -b '(batch-auto-levels "*.jpg")' -b '(gimp-quit 0)'
+
+# change extension
+for i in $(ls *.JPG); do mv $i ${i%JPG}jpg; done
+
+# vim hexedit
+# %!xxd
+# %!xxd -r
+
+# GPG verify SIG
+# 1/ import pubkey
+gpg --verify courier-authlib-0.65.0.tar.bz2.sig courier-authlib-0.65.0.tar.bz2
+
+# rdesktop VRDP
+rdesktop-vrdp -u vbox -p- localhost:3340
+
+# convert pictures
+for i in $(ls *.JPG); do convert -resize 1024x768 -quality 75 $i medium_${i%JPG}jpg; done
+
+# convert image to grayscale
+convert IMG_IN -set colorspace Gray -separate -average IMG_OUT
+
+# check ssh fingerprint
+ssh-keygen -l -f /etc/ssh/ssh_host_rsa_key
+
+# show certificate fingerprint
+openssl x509 -noout -fingerprint -sha256 -inform pem -in [certificate-file.crt]
+openssl x509 -noout -fingerprint -sha1 -inform pem -in [certificate-file.crt]
+openssl x509 -noout -fingerprint -md5 -inform pem -in [certificate-file.crt]
+
+# checkpoint vms / https://fedoraproject.org/wiki/Features/Virt_Live_Snapshots
+virsh snapshot-create-as myvm snapshot1 "before catalyst" --disk-only --atomic
+virsh blockpull --domain myvm --path /var/lib/libvirt/images/myvm.snapshot1 # merge
+virsh snapshot-revert myvm snapshot1 # revert
+virsh snapshot-delete myvm snapshot1 # delete snapshot
+
+# convert from some codepage to unicode
+iconv -f CP1251 -t UTF-8 old > new
+
+# mount raw file
+losetup /dev/loop0 yo.img
+kpartx -av /dev/loop0
+mount /dev/mapper/...
+kpartx -dv /dev/loop0
+losetup -d /dev/loop0
+
+# ping with jumbo frame
+ping -Mdo -s 8001  dest
+
+# grub install
+device (hd0) /dev/sda
+
+# libvirt send sysrq
+virsh send-key vm-file KEY_LEFTALT KEY_SYSRQ KEY_S
+
+# reduce pdf size
+# https://ghostscript.com/doc/current/VectorDevices.htm#distillerparams
+# -dPDFSETTINGS=/screen (screen-view-only quality, 72 dpi images)
+# -dPDFSETTINGS=/ebook (low quality, 150 dpi images)
+# -dPDFSETTINGS=/printer (high quality, 300 dpi images)
+# -dPDFSETTINGS=/prepress (high quality, color preserving, 300 dpi imgs)
+# -dPDFSETTINGS=/default (almost identical to /screen)
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile=output_screen.pdf input.pdf
+
+# convert multipage pdf to mono png files at 150 dpi
+gs -sDEVICE=pngmono -r150x150 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=p%02d.png input.pdf
+
+# convert multiple image files into a pdf
+convert -page a4 -adjoin p*.png multipage.pdf
+
+# convert multiple pdf files into a pdf
+convert -density 150 *.pdf multipage.pdf
+
+# measure http response time
+curl -so /dev/null -w '%{time_total}\n' http://somehost/url
+
+# burn gapless
+# https://wiki.archlinux.org/index.php/Gapless_Audio_CD_Creation_from_MP3s
+for file in *.wav ; do
+	echo "TRACK AUDIO"
+	echo "FILE \"$file\" 0"
+done > toc
+cdrdao write --speed 8 toc
+
+# gnuplot, plot file with time range
+set timefmt "%H:%M:%S"
+set xdata time
+set format x "%H:%M"
+plot 'filename' u 1:12 w l
+
+# encrypt AES265 for winzip
+7za a test.zip test.txt -tzip -mem=AES256 -mx9 -p
+
+# virtualbox disable time sync
+vboxmanage setextradata win7 "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" 1
+
+# create a file with size
+truncate -s 1G dsa		# 1 go
+truncate -r ref_file dsa	# same size as ref_file
+
+# create a 40G sparse file
+dd if=/dev/zero of=bkpf17 bs=1G seek=40 count=0
+## or
+truncate -s 40G bkpf17
+
+# ssh show key fingerprint
+ssh-keygen -l -f /etc/ssh/ssh_host_ecdsa_key.pub
+
+# convert qemu img with compression, to qcow2
+qemu-img convert -c -O qcow2 -o compat=1.1 in.raw out.qcow2
+
+# create qcow2 (compression is enabled by default)
+qemu-img create -f qcow2 -o compat=1.1 out.qcow2 10G
+
+# clear nfs idpmapd cache
+nfsidmap -c
+
+# systemd stuff
+systemctl list-dependencies
+systemd-analyze blame
+journalctl -b	# events since last boot
+journalctl --since=today
+journalctl -p err
+journalctl -f	# tail
+
+# rrd - remove spikes
+rrdtool tune ds.rrd -i dsname:-1	# tune min value of dsname to -1 (max: -a).
+rrdtool dump ds.rrd > d			# dump
+rrdtool restore d dsnew.rrd -r		# restore with range check (-r)
+
+# scp - copy with space/... in path
+scp 1.2.3.4:"'/foo/bar'" dest
+
+# find broken symlinks
+find -L . -type l
+## or
+find . -xtype l
+
+# check trim/discard
+lsblk -D
+
+# legacy ssh to old hosts
+ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 root@sb-hol
+
+# convert to BG cyrillic
+iconv -c -f UTF-8 -t ISO-8859-1 file
+
+# convert to monochrome image
+convert -density 150 -threshold 60% infile outfile
+
+# generate fingerprints from known hosts
+ssh-keygen -l -f ~/.ssh/known_hosts
+
+# extract rpm files
+rpm2cpio myrpmfile.rpm | cpio -idmv
+
+# extract scripts from rpm files
+rpm -qp --scripts my_package.rpm > ListOfScripts
+
+# make vfat aligned
+mkfs.vfat -v -F32 -s 128 -R 256 /dev/sda1
+
+# check wireless stations
+iw dev wlan0 station dump
+
+# openssl decrypt s/mime .eml email
+openssl smime -decrypt -in testenc2 -inkey fname.key fname.pem
+
+# convert plain pdf into searchable pdf (OCR):
+tesseract --oem 3 --psm 1 -l deu dsd-001.jpg 1 pdf
+
+# ps / sort by cumulative cpu time
+ps aux --sort time
+
+# rough undelete in qubes OS
+qvm-pause vm
+sudo grep -a -C 500 -- 'text_to_find' /dev/mapper/qubes_dom0-vm--vmname--private--snap
+
+# list qubes nft firewall
+nft list table qubes-firewall -a
+
+# find only leaf directories (on posix fs)
+find . -type d -links 2
+
+# dos2unix variant
+tr -d '\r' < infile > outfile
+
+# add password to PDF file
+qpdf --encrypt password password 128 -- in.pdf out.pdf
+
+# show process using memory
+ps aux --sort -rss | head -n 10
+
+# print everything after a match
+sed -ne '/pattern/,$ p'
+## alternatively, if you don't want to print the match:
+sed -e '1,/pattern/ d'
+
+# translate accents in regular ascii (use ASCII//TRANSLIT//IGNORE if fails)
+iconv -f 'UTF-8' -t 'ASCII//TRANSLIT'
+## note: can also use 'unaccent'
+
+# convert chars that aren't alphanum to dashes
+echo "dsa  "  | tr -c '[:alnum:]' '-'
+
+# list networks from ASN
+# (find ASN with https://www.ultratools.com/tools/asnInfoResult)
+whois -h whois.radb.net -- '-i origin AS12345' | sed -ne 's/^route: \+\(.*\)/\1/p'
+
+# dump partitions (restore with sfdisk /dev/sdX < somefile)
+sfdisk -d /dev/sdX > somefile
+
+# find what's preventing a disk from spinning down
+echo 1 > /proc/sys/vm/block_dump
+
