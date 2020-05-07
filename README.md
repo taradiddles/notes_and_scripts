@@ -2,7 +2,7 @@
 
 commands: 'sticky note' files with shell commands (usually one-liners) that I either tend to forget and/or took a bit of time to find out.
 
-rockpi-s/
+rockpi-s/ - installing and using a Radxa [Rock Pi S](https://wiki.radxa.com/RockpiS):
 
 - armbian installation + tweaks (power, enabling i2c/overlays/...)
 - cross compiling / installign SoapyRemote for remotely accessing a SDRplay RSPdx device
