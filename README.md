@@ -1,6 +1,4 @@
-# notes
-
-Various notes and short scripts/code
+## Various notes and short scripts/code
 
 commands: 'sticky note' files with shell commands (usually one-liners) that I either tend to forget and/or took a bit of time to find out.
 
