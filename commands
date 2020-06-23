@@ -345,3 +345,16 @@ sfdisk -d /dev/sdX > somefile
 # find what's preventing a disk from spinning down
 echo 1 > /proc/sys/vm/block_dump
 
+# selinux - permissive for a given context
+semanage permissive -a zabbix_agent_t
+
+# troubleshooting selinux
+# https://fedoramagazine.org/troubleshooting-selinux/
+
+# find files between date1 and date2
+find . -type f -newermt 2019-05-01 ! -newermt 2019-06-01
+
+# night mode
+# (https://askubuntu.com/questions/1003101/how-to-use-xrandr-gamma-for-gnome-night-light-like-usage)
+xrandr --output eDP-1 --gamma 1.1:0.8:0.7
+
